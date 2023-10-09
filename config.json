@@ -1,0 +1,22 @@
+{
+    "dbName": "eliseosteste",
+    "dbConfig": {
+        "server": "192.168.22.191",
+        "options": {
+            "port": 1433,
+            "trustServerCertificate": false,
+            "encript": false
+        },
+        "authentication": {
+            "type": "default",
+            "options": {
+                "userName": "sa",
+                "password": "2005irmaospar"
+            }
+        }
+    },
+    "port": 3000,
+    "urlBase":"/api/v1",
+    "secret":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTkwNDE5ODAsImlhdCI6MTY5NTk5MDE3MX0.Lw68A3MYT4E-DZVsoIPB3yLrBHM9FugVtF7EcNeDrOo"
+}
