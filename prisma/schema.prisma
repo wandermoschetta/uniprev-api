@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 
 generator client {
   provider = "prisma-client-js"
@@ -10,17 +9,117 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-model Pessoa {
-  id Int  @id @default(autoincrement())
-  tipoPessoa String @db.VarChar(10)
-  nome String @db.VarChar(255)
-  numeroDocumento String @db.VarChar(20)
-  
+model Pais {
+  id     Int       @id @default(autoincrement())
+  sigla  String?   @db.VarChar(5)
+  nome   String?   @db.VarChar(80)
+  ddi    String?   @db.VarChar(3)
+  nome_pt   String   @db.VarChar(80)
+  bacen  Int?
+  estado_pais Estado[] @relation("pais")
 }
 
+model Estado {
+  id     Int      @id @default(autoincrement())
+  nome   String   @db.VarChar(30)
+  pais   Pais     @relation("pais",fields: [paisId], references: [id])
+  paisId Int
+  cidade_estado Cidade[] @relation("estado")
+  uf  String   @db.VarChar(5)
+  ibge Int?
+  ddd Json?
+}
 
-model CategoriaPessoa {
-  id Int @id
-  descricao String @db.VarChar(20)
+model Cidade {
+  id       Int              @id @default(autoincrement())
+  nome     String           @db.VarChar(80)
+  cidade_estado   Estado           @relation("estado",fields: [estadoId], references: [id])
+  estadoId Int
+  ddd      String?           @db.VarChar(3)
+  ibge Int?
+  lat_lon String?            @db.VarChar(50)
+  latitude Float?            @db.DoublePrecision
+  longitude Float?           @db.DoublePrecision
+  cod_tom Int?               @db.SmallInt @default(0)
+  endereco EnderecoPessoa[] @relation("cidade")
+  cidade_empresa Empresa[]  @relation("cidade_empresa")
+}
+
+enum TipoEmpresa {
+  MATRIZ
+  FILIAL
+  GERENCIAL
+}
+
+enum Status {
+  ATIVO
+  CANCELADO
+}
+
+model Empresa {
+  id Int @id @default(autoincrement())
+  tipo TipoEmpresa @default(FILIAL)
+  status Status @default(ATIVO)
+  nomeEmpresarial String @unique @db.VarChar(255)
+  nomeFantasia String? @unique @db.VarChar(255)
+  cnpj String @unique @db.VarChar(20)
+  inscricaoMunicipal String? @db.VarChar(20)
+  inscricaoEstadual  String? @db.VarChar(20)
+  telefone String? @db.VarChar(15)
+  celular String? @db.VarChar(15)  
+  endereco String? @db.VarChar(255)
+  numEndereco String? @db.VarChar(10)
+  complemento String? @db.VarChar(30)
+  bairro String? @db.VarChar(80)
+  cep            String? @db.VarChar(10)
+  cidade_empresa  Cidade? @relation("cidade_empresa",fields: [cidadeId], references: [id])
+  cidadeId       Int?
+  pessoa Pessoa[]
+}
+
+model Pessoa {
+  id            Int             @id @default(autoincrement())
+  categoria     Json
+  tipoPessoa    String?         @db.VarChar(10)
+  nome          String  @unique @db.VarChar(255)
+  numDocumento  String?          @db.VarChar(20)
+  rg            String?         @db.VarChar(15)
+  criado_em     DateTime        @default(now())
+  atualizado_em DateTime        @updatedAt
+  contato       ContatoPessoa[]  @relation("pessoa")
+  endereco      EnderecoPessoa[] @relation("pessoa")
+  status Status @default(ATIVO)
+  empresa Empresa  @relation(fields: [empresaId], references: [id])
+  empresaId Int  
+}
+
+model EnderecoPessoa {
+  id             Int    @id @default(autoincrement())
+  pessoa   Pessoa @relation("pessoa", fields: [pessoaId], references: [id])
+  pessoaId  Int
+  tipo           String @db.VarChar(10)
+  tipoLogradouro String @db.VarChar(10)
+  logradouro     String @db.VarChar(255)
+  numLogradouro  String? @default("S/N")  @db.VarChar(10)
+  complemento    String? @db.VarChar(30)
+  bairro         String @db.VarChar(80)
+  cep            String @db.VarChar(10)
+  cidade_endereco  Cidade @relation("cidade",fields: [cidadeId], references: [id])
+  cidadeId       Int
+}
+
+enum TipoContato {
+  CELULAR
+  TELEFONE 
+  EMAIL 
+  REDE_SOCIAL
+}
+
+model ContatoPessoa {
+  id            Int    @id @default(autoincrement())
+  contato_pessoa Pessoa @relation("pessoa",fields: [pessoaId], references: [id])
+  pessoaId      Int
+  tipo          TipoContato
+  obs           String?
+  descricao     String @unique @db.VarChar(255)
 }
